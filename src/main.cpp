@@ -1,10 +1,12 @@
 #include <Arduino.h>
-#include "AccelStepper.h"
+#include <AccelStepper.h>
+#include <ArduinoBLE.h>
 
 // ################################################################################################### //
 //                                        Definitions
 // ################################################################################################### //
 
+// All motors:
 #define MOTORS_ENABLE_PIN 8
 
 // On Arduino shield: X
