@@ -2,6 +2,9 @@
 #include <AccelStepper.h>
 #include <ArduinoBLE.h>
 
+#include <string>
+#include <vector>
+
 // ################################################################################################### //
 //                                        Definitions
 // ################################################################################################### //
@@ -34,11 +37,20 @@ AccelStepper motorL1(1, MOTOR_L1_STEP_PIN, MOTOR_L1_DIR_PIN);
 AccelStepper motorR2(1, MOTOR_R2_STEP_PIN, MOTOR_R2_DIR_PIN);
 AccelStepper motorR1(1, MOTOR_R1_STEP_PIN, MOTOR_R1_DIR_PIN);
 
+// BLE setup:
+const char * deviceServiceUUID = "19b10000-e8f2-537e-4f6c-d104768a1214";
+const char * modeRequestCharacteristicUUID = "19b10000-e8f2-537e-4f6c-d104768a1215";
+
+BLEService roverService(deviceServiceUUID);
+BLEIntCharacteristic modeRequest(modeRequestCharacteristicUUID, BLEWrite);
+
 // ################################################################################################### //
 //                                             Setup
 // ################################################################################################### //
 
 void setup() {
+  Serial.begin(9600);
+
   pinMode(MOTORS_ENABLE_PIN, OUTPUT);
 
   motorL1.setEnablePin(MOTORS_ENABLE_PIN);
@@ -68,6 +80,22 @@ void setup() {
   motorR2.setMaxSpeed(1000);                       // Max reliable 4000
   //motorR2.setSpeed(100);
   motorR2.enableOutputs();
+
+  BLE.setDeviceName("Omni-Rover");
+  BLE.setLocalName("Omni-Rover");
+
+  if(!BLE.begin()){
+    Serial.println("[ERROR]\tstarting BLE module failed!");
+    while(true);
+  }
+
+  BLE.setAdvertisedService(roverService);
+  roverService.addCharacteristic(modeRequest);
+  BLE.addService(roverService);
+
+  BLE.advertise();
+  Serial.println("[INFO]\tStart Scanning...");
+
 }
 
 
@@ -77,5 +105,23 @@ void setup() {
 
 void loop()
 {
-  
+  // Discovering central device
+  BLEDevice central = BLE.central();
+  delay(100);
+
+  if(central){
+    Serial.println("[INFO]\tConnected!");
+
+    while(central.connected()){
+      
+
+
+
+
+
+
+
+
+    }
+  }
 }
