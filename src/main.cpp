@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <AccelStepper.h>
 #include <ArduinoBLE.h>
+#include <WiFiS3.h>
 
 #include <string>
 #include <vector>
@@ -39,10 +40,12 @@ AccelStepper motorR1(1, MOTOR_R1_STEP_PIN, MOTOR_R1_DIR_PIN);
 
 // BLE setup:
 const char * deviceServiceUUID = "19b10000-e8f2-537e-4f6c-d104768a1214";
-const char * modeRequestCharacteristicUUID = "19b10000-e8f2-537e-4f6c-d104768a1215";
+const char * StatusCharacteristicUUID = "19b10001-e8f2-537e-4f6c-d104768a1215";
 
 BLEService roverService(deviceServiceUUID);
-BLEIntCharacteristic modeRequest(modeRequestCharacteristicUUID, BLEWrite);
+BLEIntCharacteristic statusResponseCharacteristic(StatusCharacteristicUUID, BLEWrite);
+
+int status = 0;
 
 // ################################################################################################### //
 //                                             Setup
@@ -90,11 +93,12 @@ void setup() {
   }
 
   BLE.setAdvertisedService(roverService);
-  roverService.addCharacteristic(modeRequest);
+  roverService.addCharacteristic(statusResponseCharacteristic);
   BLE.addService(roverService);
 
   BLE.advertise();
   Serial.println("[INFO]\tStart Scanning...");
+  Serial.println("      \t---");
 
 }
 
@@ -105,23 +109,35 @@ void setup() {
 
 void loop()
 {
+
+  if (status%2==0){
+    Serial.print("      \t---\r");
+  } 
+  else {
+    Serial.print("      \t-|-\r");
+  }
   // Discovering central device
   BLEDevice central = BLE.central();
   delay(100);
+
+  status++;
+
+      if (status >= 10) {
+        status = 0;
+      }
 
   if(central){
     Serial.println("[INFO]\tConnected!");
 
     while(central.connected()){
       
+      statusResponseCharacteristic.setValue(status);
 
+      status++;
 
-
-
-
-
-
-
+      if (status >= 10) {
+        status = 0;
+      }
     }
   }
 }
