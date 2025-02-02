@@ -1,5 +1,7 @@
 #include "motor_controller.hpp"
 
+#include <vector>
+
 float WHEEL_RADIUS = 0.03;
 float L_X = 0.075;
 float L_Y = 0.05;
