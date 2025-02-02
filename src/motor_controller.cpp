@@ -1,12 +1,13 @@
 #include "motor_controller.hpp"
 
 #include <vector>
+#include <math.h>
 
 float WHEEL_RADIUS = 0.03;
 float L_X = 0.075;
 float L_Y = 0.05;
 
-std::vector<float> get_wheel_velocities(float v_x, float v_y, float omega){
+std::vector<float> wheelVelocitiesFromCartesian(float v_x, float v_y, float omega) {
     std::vector<float> wheel_velocities(4);
 
     float omega_fl = 1/WHEEL_RADIUS * (v_x - v_y - (L_X + L_Y) * omega);

@@ -40,18 +40,6 @@ AccelStepper motorL1(1, MOTOR_L1_STEP_PIN, MOTOR_L1_DIR_PIN);
 AccelStepper motorR2(1, MOTOR_R2_STEP_PIN, MOTOR_R2_DIR_PIN);
 AccelStepper motorR1(1, MOTOR_R1_STEP_PIN, MOTOR_R1_DIR_PIN);
 
-// BLE setup:
-const char * CCCD_DESCRIPTOR_UUID = "00002902-0000-1000-8000-00805F9B34FB";
-const char * deviceServiceUUID = "19b10000-e8f2-537e-4f6c-d104768a1214";
-const char * statusCharacteristicUUID = "19b10001-e8f2-537e-4f6c-d104768a1215";
-const char * controlCharacteristicUUID = "19b10001-e8f2-537e-4f6c-d104768a1216";
-
-BLEService roverService(deviceServiceUUID);
-BLEIntCharacteristic statusResponseCharacteristic(statusCharacteristicUUID, BLENotify);
-BLECharacteristic controlInputCharacteristic(controlCharacteristicUUID, BLEWrite, 20);
-
-uint8_t status = 0;
-
 // ################################################################################################### //
 //                                             Setup
 // ################################################################################################### //
@@ -88,27 +76,6 @@ void setup() {
   motorR2.setMaxSpeed(1000);                       // Max reliable 4000
   //motorR2.setSpeed(100);
   motorR2.enableOutputs();
-
-  if(!BLE.begin()){
-    Serial.println("[ERROR]\tstarting BLE module failed!");
-    while(true);
-  }
-
-  BLE.setDeviceName("Omni-Rover");
-  BLE.setLocalName("Omni-Rover");
-
-  BLE.setAdvertisedService(roverService);
-  roverService.addCharacteristic(statusResponseCharacteristic);
-  roverService.addCharacteristic(controlInputCharacteristic);
-  //statusResponseCharacteristic.descriptor(CCCD_DESCRIPTOR_UUID);
-  BLE.addService(roverService);
-
-  statusResponseCharacteristic.writeValue(0);
-  controlInputCharacteristic.setValue(0);
-
-  BLE.advertise();
-  Serial.println("[INFO]\tStart Scanning...");
-
 }
 
 
@@ -118,38 +85,5 @@ void setup() {
 
 void loop()
 {
-
-  if (status%2==0){
-    Serial.print("      \t---\r");
-  } 
-  else {
-    Serial.print("      \t-|-\r");
-  }
-  // Discovering central device
-  BLEDevice central = BLE.central();
-  delay(100);
-
-  status++;
-
-      if (status >= 3) {
-        status = 0;
-      }
-
-  if(central){
-    Serial.println("[INFO]\tConnected!");
-
-    while(central.connected()){
-
-      Serial.println(status);
-      
-      statusResponseCharacteristic.writeValue(status);
-
-      status++;
-      delay(1000);
-
-      if (status >= 3) {
-        status = 0;
-      }
-    }
-  }
+  
 }
