@@ -1,11 +1,10 @@
 #include <Arduino.h>
 #include <AccelStepper.h>
-#include <ArduinoBLE.h>
-#include <WiFiS3.h>
 
 #include <string>
 #include <vector>
 
+#include "serial_handler.hpp"
 #include "motor_controller.hpp"
 
 // ################################################################################################### //
@@ -33,29 +32,32 @@
 
 // General definitions
 int steps_per_rev = 200;  //  1.8° per step
-int microsteps = 8;
+int microsteps = 8;       //  8 microsteps per step
+
+unsigned long lastCommandTime = 0;
+unsigned long watchDogTimer = 500; // 0.5 second
 
 AccelStepper motorL2(1, MOTOR_L2_STEP_PIN, MOTOR_L2_DIR_PIN);
 AccelStepper motorL1(1, MOTOR_L1_STEP_PIN, MOTOR_L1_DIR_PIN);
 AccelStepper motorR2(1, MOTOR_R2_STEP_PIN, MOTOR_R2_DIR_PIN);
 AccelStepper motorR1(1, MOTOR_R1_STEP_PIN, MOTOR_R1_DIR_PIN);
 
+SerialHandler serialHandler(Serial);
+
 // ################################################################################################### //
 //                                             Declarations
 // ################################################################################################### //
 
-void applyWheelVelocities(std::vector<float> wheel_velocities);
-
-void runMotors();
 
 // ################################################################################################### //
 //                                             Setup
 // ################################################################################################### //
 
 void setup() {
-  Serial.begin(9600);
+  serialHandler.begin(9600);
 
   pinMode(MOTORS_ENABLE_PIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
 
   motorL1.setEnablePin(MOTORS_ENABLE_PIN);
   motorL1.setPinsInverted(false, false, true);
@@ -93,7 +95,13 @@ void setup() {
 
 void loop()
 {
-  applyWheelVelocities(wheelVelocitiesFromCartesian(0,0.2,0));
+  serialHandler.handleSerialInput();
+
+  if (millis() - lastCommandTime > watchDogTimer) {
+    resetMotorVelocities();
+  }
+  lastCommandTime = millis();
+
   runMotors();
 }
 
@@ -101,16 +109,3 @@ void loop()
 //                                     Function Definitions
 // ################################################################################################### //
 
-void applyWheelVelocities(std::vector<float> wheel_velocities){
-  motorL1.setSpeed(wheel_velocities[0]);
-  motorR1.setSpeed(wheel_velocities[1]);
-  motorL2.setSpeed(wheel_velocities[2]);
-  motorR2.setSpeed(wheel_velocities[3]);
-}
-
-void runMotors(){
-  motorL1.runSpeed();
-  motorR1.runSpeed();
-  motorL2.runSpeed();
-  motorR2.runSpeed();
-}

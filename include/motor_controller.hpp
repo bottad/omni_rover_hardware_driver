@@ -1,4 +1,31 @@
+#ifndef MOTOR_CONTROLLER_HPP
+#define MOTOR_CONTROLLER_HPP
+
 #include <vector>
+
+/**
+ * @brief Applies the specified wheel velocities to the motors.
+ * 
+ * This function takes a vector of four floats representing the desired wheel velocities for a
+ * four-wheeled omnidirectional rover and applies them to the corresponding stepper motors.
+ * 
+ * @param wheel_velocities A vector of four floats representing the wheel velocities.
+ */
+void applyWheelVelocities(std::vector<float> wheel_velocities);
+
+/**
+ * @brief Resets the motor speeds to zero.
+ * 
+ * This function sets the speeds of all motors to zero, effectively stopping them.
+ */
+void resetMotorVelocities();
+
+/**
+ * @brief Runs the stepper motors at the specified speeds.
+ * 
+ * This function runs the stepper motors at the speeds set by the applyWheelVelocities function.
+ */
+void runMotors();
 
 /**
  * @brief Converts radians to steps.
@@ -26,3 +53,5 @@ float radiansToSteps(float radians);
  * @return A vector of four floats representing the wheel velocities.
  */
 std::vector<float> wheelVelocitiesFromCartesian(float v_x, float v_y, float omega);
+
+#endif // MOTOR_CONTROLLER_HPP
