@@ -4,8 +4,6 @@
 #include <Arduino.h>
 #include "Arduino_LED_Matrix.h"
 
-#define LED_PIN 13 // Built in LED
-
 extern byte frame[8][12];
 
 static const char START_SYMBOL = '$';

@@ -64,7 +64,7 @@ std::vector<float> wheelVelocitiesFromCartesian(float v_x, float v_y, float omeg
 
     v_x *= vMaxMultiplier;
     v_y *= vMaxMultiplier;
-    omega *= vMaxMultiplier;
+    omega *= wMaxMultiplier;
 
     float omega_fl = 1/WHEEL_RADIUS * (v_x - v_y - (L_X + L_Y) * omega);
     float omega_fr = 1/WHEEL_RADIUS * (v_x + v_y + (L_X + L_Y) * omega);

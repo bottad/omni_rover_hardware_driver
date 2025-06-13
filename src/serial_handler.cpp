@@ -190,7 +190,7 @@ void SerialHandler::onVelocityCommand(const char* content, size_t length) {
   float v_y = static_cast<float>(raw_vy) / 32768.0; // Map to [-1.0, 1.0]
   float rot_z = static_cast<float>(raw_rotz) / 32768.0; // Map to [-1.0, 1.0]
 
-  // applyWheelVelocities(wheelVelocitiesFromCartesian(v_x, v_y, rot_z));
+  applyWheelVelocities(wheelVelocitiesFromCartesian(v_x, v_y, rot_z));
 
   // Optional debug print
   // char msg[64];
