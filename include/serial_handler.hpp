@@ -2,20 +2,27 @@
 #define SERIAL_HANDLER_HPP
 
 #include <Arduino.h>
+#include "Arduino_LED_Matrix.h"
 
 #define LED_PIN 13 // Built in LED
 
+extern byte frame[8][12];
+
 static const char START_SYMBOL = '$';
 static const char END_SYMBOL = '\n';
-static const size_t MAX_MESSAGE_LENGTH = 64;
-static const unsigned long serialTimeout = 100; // ms
+static const size_t MAX_MESSAGE_LENGTH = 30;
 
 // Define message types
 const char MSG = 'M';
-const char CMD_SPEED = 'S';
+const char CMD_SUPER = 'S';
+const char CMD_VELOCITY = 'V';
 const char ERR = 'E';
 
-extern unsigned long lastCommandTime;
+enum ParserState {
+    IDLE,
+    RECEIVING,
+    COMPLETE
+};
 
 class SerialHandler {
 public:
@@ -30,17 +37,16 @@ public:
     void sendError(const char* error);
 
 private:
-    HardwareSerial& serialPort; // Reference to the serial port
+    HardwareSerial& serialPort_; // Reference to the serial port
 
-    char messageBuffer[MAX_MESSAGE_LENGTH];
-    size_t bufferIndex;
-    bool messageComplete;
-    bool messageStarted;
+    char messageBuffer_[MAX_MESSAGE_LENGTH];
+    size_t bufferIndex_;
+    ParserState parserState_;
 
-    unsigned long lastCharTime = 0;
-
-    void onSpeedCommand(const char* content, size_t length);
+    void onVelocityCommand(const char* content, size_t length);
     void resetParserState();
+
+    void drawJoystickRegion(uint16_t v_x, uint16_t v_y);
 };
 
 #endif // SERIAL_HANDLER_HPP

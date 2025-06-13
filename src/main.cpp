@@ -6,6 +6,7 @@
 
 #include "serial_handler.hpp"
 #include "motor_controller.hpp"
+#include "Arduino_LED_Matrix.h"
 
 // ################################################################################################### //
 //                                        Definitions
@@ -44,6 +45,9 @@ AccelStepper motorR1(1, MOTOR_R1_STEP_PIN, MOTOR_R1_DIR_PIN);
 
 SerialHandler serialHandler(Serial);
 
+ArduinoLEDMatrix matrix;
+byte frame[8][12] = {0};
+
 // ################################################################################################### //
 //                                             Declarations
 // ################################################################################################### //
@@ -54,38 +58,41 @@ SerialHandler serialHandler(Serial);
 // ################################################################################################### //
 
 void setup() {
-  serialHandler.begin(9600);
+  serialHandler.begin(115200);
 
-  pinMode(MOTORS_ENABLE_PIN, OUTPUT);
-  pinMode(LED_PIN, OUTPUT);
+  matrix.begin();
 
-  motorL1.setEnablePin(MOTORS_ENABLE_PIN);
-  motorL1.setPinsInverted(false, false, true);
-  motorL1.setAcceleration(100);
-  motorL1.setMaxSpeed(1000);                       // Max reliable 4000
-  motorL1.setSpeed(0);
-  motorL1.enableOutputs();
+  // pinMode(MOTORS_ENABLE_PIN, OUTPUT);
+  // pinMode(LED_PIN, OUTPUT);
+  // digitalWrite(LED_PIN, LOW);
 
-  motorR1.setEnablePin(MOTORS_ENABLE_PIN);
-  motorR1.setPinsInverted(false, false, true);
-  motorR1.setAcceleration(100);
-  motorR1.setMaxSpeed(1000);                       // Max reliable 4000
-  motorR1.setSpeed(0);
-  motorR1.enableOutputs();
+  // motorL1.setEnablePin(MOTORS_ENABLE_PIN);
+  // motorL1.setPinsInverted(false, false, true);
+  // motorL1.setAcceleration(100);
+  // motorL1.setMaxSpeed(1000);                       // Max reliable 4000
+  // motorL1.setSpeed(0);
+  // motorL1.enableOutputs();
 
-  motorL2.setEnablePin(MOTORS_ENABLE_PIN);
-  motorL2.setPinsInverted(false, false, true);
-  motorL2.setAcceleration(100);
-  motorL2.setMaxSpeed(1000);                       // Max reliable 4000
-  motorL2.setSpeed(0);
-  motorL2.enableOutputs();
+  // motorR1.setEnablePin(MOTORS_ENABLE_PIN);
+  // motorR1.setPinsInverted(false, false, true);
+  // motorR1.setAcceleration(100);
+  // motorR1.setMaxSpeed(1000);                       // Max reliable 4000
+  // motorR1.setSpeed(0);
+  // motorR1.enableOutputs();
 
-  motorR2.setEnablePin(MOTORS_ENABLE_PIN);
-  motorR2.setPinsInverted(false, false, true);
-  motorR2.setAcceleration(100);
-  motorR2.setMaxSpeed(1000);                       // Max reliable 4000
-  motorR2.setSpeed(0);
-  motorR2.enableOutputs();
+  // motorL2.setEnablePin(MOTORS_ENABLE_PIN);
+  // motorL2.setPinsInverted(false, false, true);
+  // motorL2.setAcceleration(100);
+  // motorL2.setMaxSpeed(1000);                       // Max reliable 4000
+  // motorL2.setSpeed(0);
+  // motorL2.enableOutputs();
+
+  // motorR2.setEnablePin(MOTORS_ENABLE_PIN);
+  // motorR2.setPinsInverted(false, false, true);
+  // motorR2.setAcceleration(100);
+  // motorR2.setMaxSpeed(1000);                       // Max reliable 4000
+  // motorR2.setSpeed(0);
+  // motorR2.enableOutputs();
 }
 
 
@@ -98,9 +105,11 @@ void loop()
   serialHandler.handleSerialInput();
 
   if (millis() - lastCommandTime > watchDogTimer) {
-    resetMotorVelocities();
+    // resetMotorVelocities();
   }
   lastCommandTime = millis();
+
+  matrix.renderBitmap(frame, 8, 12);
 
   runMotors();
 }

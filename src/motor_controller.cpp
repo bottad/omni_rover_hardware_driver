@@ -9,7 +9,8 @@ float WHEEL_RADIUS = 0.03;
 float L_X = 0.075;
 float L_Y = 0.05;
 
-float vMaxMultiplier = 6; // 24 for absolut max of 4000 steps/s, 6 for 1000 steps/s
+float vMaxMultiplier = 0.3; // Max speed in m/s
+float wMaxMultiplier = 0.2; // Max angular speed in rad/s
 
 extern int steps_per_rev;
 extern int microsteps;
@@ -44,6 +45,20 @@ float radiansToSteps(float radians){
     return radians * steps_per_rev * microsteps / (2 * M_PI);
 }
 
+/**
+ * @brief Converts Cartesian velocity commands (v_x, v_y, omega) to wheel velocities in steps per second.
+ * 
+ * This function calculates the individual wheel velocities required to achieve the specified 
+ * Cartesian velocity commands for a four-wheeled omnidirectional robot. The inputs are unitless 
+ * commands in the range [-1, 1], and the `vMaxMultiplier` is used to scale these commands to 
+ * their actual dimensions. The velocities are returned as a vector, where each element corresponds 
+ * to the velocity of a specific wheel.
+ * 
+ * @param v_x Unitless linear velocity command in the x direction, expected to be in the range [-1, 1].
+ * @param v_y Unitless linear velocity command in the y direction, expected to be in the range [-1, 1].
+ * @param omega Unitless angular velocity command around the z-axis, expected to be in the range [-1, 1].
+ * @return A vector containing the wheel velocities (steps per second) for each of the four wheels.
+ */
 std::vector<float> wheelVelocitiesFromCartesian(float v_x, float v_y, float omega){
     std::vector<float> wheel_velocities(4);
 
