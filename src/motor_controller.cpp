@@ -9,8 +9,8 @@ float WHEEL_RADIUS = 0.03;
 float L_X = 0.075;
 float L_Y = 0.05;
 
-float vMaxMultiplier = 0.3; // Max speed in m/s
-float wMaxMultiplier = 0.2; // Max angular speed in rad/s
+float vMaxMultiplier = 0.4; // Max speed in m/s
+float wMaxMultiplier = 0.5; // Max angular speed in rad/s
 
 extern int steps_per_rev;
 extern int microsteps;
@@ -42,7 +42,7 @@ void runMotors(){
 }
 
 float radiansToSteps(float radians){
-    return radians * steps_per_rev * microsteps / (2 * M_PI);
+  return radians * steps_per_rev * microsteps / (2 * M_PI);
 }
 
 /**
