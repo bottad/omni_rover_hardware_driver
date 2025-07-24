@@ -1,19 +1,17 @@
-#include "motor_controller.hpp"
+#include "motor_control.hpp"
 
 #include <vector>
 #include <math.h>
 
 #include <AccelStepper.h>
+#include "hardware_config.hpp"
 
-float WHEEL_RADIUS = 0.03;
-float L_X = 0.075;
-float L_Y = 0.05;
+constexpr float WHEEL_RADIUS = 0.03;
+constexpr float L_X = 0.075;
+constexpr float L_Y = 0.05;
 
 float vMaxMultiplier = 0.4; // Max speed in m/s
 float wMaxMultiplier = 0.5; // Max angular speed in rad/s
-
-extern int steps_per_rev;
-extern int microsteps;
 
 extern AccelStepper motorL2;
 extern AccelStepper motorL1;
@@ -42,7 +40,7 @@ void runMotors(){
 }
 
 float radiansToSteps(float radians){
-  return radians * steps_per_rev * microsteps / (2 * M_PI);
+  return radians * STEPS_PER_REV * MICROSTEPS / (2 * M_PI);
 }
 
 /**

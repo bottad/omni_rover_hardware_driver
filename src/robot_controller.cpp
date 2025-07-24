@@ -1,18 +1,11 @@
 #include "robot_controller.hpp"
-#include "motor_controller.hpp"
+#include "hardware_config.hpp"
+#include "motor_control.hpp"
 
-/**
- * @brief Constructs a RobotController object.
- */
 RobotController::RobotController() : mode_(MODE_IDLE), serialHandler_(Serial){
     frame_[8][12] = {0};
 }
 
-/**
- * @brief Initializes the robot controller.
- * 
- * This function sets up the serial communication and initializes the LED matrix.
- */
 void RobotController::initiate() {
     serialHandler_.begin(115200);
 
@@ -21,14 +14,10 @@ void RobotController::initiate() {
     return;
 }
 
-/**
- * @brief Updates the robot controller state.
- * 
- * This function checks for incoming serial messages, processes them, and updates the LED matrix.
- * It also handles the watchdog timer to reset motor velocities if no command is received within the specified time.
- */
 void RobotController::update() {
     auto maybeMessage = serialHandler_.handleSerialInput();
+
+    unsigned long now = millis();
 
     if (maybeMessage) {// Check if valid message from the serial handler received
         const SerialMessage& msg = *maybeMessage;
@@ -52,7 +41,7 @@ void RobotController::update() {
                 break;
         }
 
-        lastCommandTime_ = millis(); // Update time if we command received
+        lastCommandTime_ = now; // Update time if we command received
     }
 
     if (millis() - lastCommandTime_ > watchDogTimer_) {
@@ -60,18 +49,22 @@ void RobotController::update() {
         frame_[8][12] = {0};
     }
 
+    if (now - lastBatteryUpdateTime_ >= batteryReportInterval_) {
+        uint16_t voltage = readBatteryVoltage();
+
+        uint8_t data[2];
+        data[0] = (voltage >> 8) & 0xFF; // high byte
+        data[1] = voltage & 0xFF;        // low byte
+
+        serialHandler_.sendCommand(CMD_BATTERY, data, 2);
+
+        lastBatteryUpdateTime_ = now;
+    }
+
     matrix_.renderBitmap(frame_, 8, 12);
     runMotors();
 }
 
-/**
- * @brief Handles the super command.
- * 
- * This function processes the super command to switch between different operating modes.
- * 
- * @param content Pointer to the command content after the 'S' command byte.
- * @param length Length of the command content.
- */
 void RobotController::onSuperCommand(const char* content, size_t length) {
     if (length != 1) {
         char errorMsg[40];
@@ -98,14 +91,6 @@ void RobotController::onSuperCommand(const char* content, size_t length) {
     }
 }
 
-/**
- * @brief Handles the velocity command.
- * 
- * This function processes the velocity command to set wheel velocities based on joystick input. If the robot is in MODE_VELOCITY, it applies the velocities to the motors.
- * 
- * @param content Pointer to the command content after the 'V' command byte.
- * @param length Length of the command content.
- */
 void RobotController::onVelocityCommand(const char* content, size_t length) {
     if (length != 6) {
         char errorMsg[50];
@@ -138,18 +123,24 @@ void RobotController::onVelocityCommand(const char* content, size_t length) {
     // serialHandler_.sendMessage(msg);
 }
 
-/**
- * @brief Draws the joystick region on the LED matrix.
- * 
- * This function lights up the LEDs based on the joystick coordinates (v_x, v_y).
- * If the coordinates are near the center, it lights up the center LEDs.
- * Otherwise, it maps the coordinates to the matrix range and lights up the corresponding LED.
- * 
- * @param v_x Joystick x-coordinate (0 to 65535).
- * @param v_y Joystick y-coordinate (0 to 65535).
- */
+
+uint16_t RobotController::readBatteryVoltage() {
+    const float referenceVoltage = 5.0;      // ADC reference voltage (Arduino 5V)
+    const float voltageDividerRatio = 4.2;   // Adjust according to your resistor divider
+    
+    int analogValue = analogRead(BATTERY_VOLTAGE_PIN);  // Read ADC (0 - 1023)
+    
+    // Calculate voltage at the battery terminals in volts
+    float voltage = (analogValue / 1023.0f) * referenceVoltage * voltageDividerRatio;
+    
+    // Convert to millivolts and return as uint16_t
+    uint16_t voltage_mV = static_cast<uint16_t>(voltage * 1000.0f);
+    
+    return voltage_mV;
+}
+
 void RobotController::drawJoystickRegion(uint16_t v_x, uint16_t v_y) {
-    memset(frame_, 0, sizeof(frame));  // Clear the global frame array
+    memset(frame_, 0, sizeof(frame_));  // Clear the global frame array
 
     // Define midpoint and tolerance threshold
     const uint16_t midpoint = 32768;

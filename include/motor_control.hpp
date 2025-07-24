@@ -1,5 +1,5 @@
-#ifndef MOTOR_CONTROLLER_HPP
-#define MOTOR_CONTROLLER_HPP
+#ifndef MOTOR_CONTROL_HPP
+#define MOTOR_CONTROL_HPP
 
 #include <vector>
 
@@ -54,4 +54,4 @@ float radiansToSteps(float radians);
  */
 std::vector<float> wheelVelocitiesFromCartesian(float v_x, float v_y, float omega);
 
-#endif // MOTOR_CONTROLLER_HPP
+#endif // MOTOR_CONTROL_HPP
