@@ -30,4 +30,6 @@ constexpr int STEPS_PER_REV = 200;  //  1.8° per step
 constexpr int MICROSTEPS = 8;       //  8 microsteps per step
 constexpr int MAX_SPEED = 2000;     // Max speed in steps per second, max reliable 4000
 
+constexpr float REFERENCE_VOLTAGE = 1.5; // Determined by measuring the battery voltage with a multimeter and comparing it to the ADC reading
+
 #endif // HARDWARE_CONFIG_HPP

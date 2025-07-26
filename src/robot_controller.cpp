@@ -125,13 +125,12 @@ void RobotController::onVelocityCommand(const char* content, size_t length) {
 
 
 uint16_t RobotController::readBatteryVoltage() {
-    const float referenceVoltage = 5.0;      // ADC reference voltage (Arduino 5V)
-    const float voltageDividerRatio = 4.2;   // Adjust according to your resistor divider
+    const float voltageDividerRatio = 15.73;
     
-    int analogValue = analogRead(BATTERY_VOLTAGE_PIN);  // Read ADC (0 - 1023)
+    int analogValue = analogRead(BATTERY_VOLTAGE_PIN);  // Read ADC (0 - 4095)
     
     // Calculate voltage at the battery terminals in volts
-    float voltage = (analogValue / 1023.0f) * referenceVoltage * voltageDividerRatio;
+    float voltage = (analogValue / 4095.0f) * REFERENCE_VOLTAGE * voltageDividerRatio;
     
     // Convert to millivolts and return as uint16_t
     uint16_t voltage_mV = static_cast<uint16_t>(voltage * 1000.0f);

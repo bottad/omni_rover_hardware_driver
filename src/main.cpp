@@ -28,6 +28,9 @@ RobotController robotController;
 // ################################################################################################### //
 
 void setup() {
+  analogReadResolution(12);     // Set ADC resolution to 12 bits (0-4095)
+  analogReference(AR_INTERNAL); // Set ADC reference to internal ~1.1V
+
   robotController.initiate();
 
   pinMode(MOTORS_ENABLE_PIN, OUTPUT);

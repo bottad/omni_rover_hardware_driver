@@ -45,6 +45,7 @@ std::optional<SerialMessage> SerialHandler::handleSerialInput() {
           if (byte == START_SYMBOL) {
             parserState_ = RECEIVING;
           }
+          return msg; // Return immediately to process super command
         } else {
           if (byte == START_SYMBOL) {
             resetParserState();
