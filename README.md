@@ -1,64 +1,121 @@
 # Omni Rover Hardware Driver
 
-## Purpose
+## Overview
 
-The **Omni Rover Hardware Driver** is a software system designed to control an omni-directional robot with mecanum wheels. The robot can move in all directions (X, Y, and rotation) by controlling four stepper motors. The system uses an Arduino and communicates with external devices via serial commands, making it easy to control the robot's movement remotely.
+The **Omni Rover Hardware Driver** is the **low-level firmware** for an omni-directional rover with mecanum wheels, powered by stepper motors and controlled by an Arduino.
+It is designed to work **in conjunction with the [omni\_robot\_driver](https://github.com/bottad/omni_robot_driver)** ROS package, which handles high-level control, navigation, and joystick input.
 
-## Communication Format
+While the firmware is optimized for use with the ROS driver, **input commands can be sent by any source** as long as they follow the same message protocol and are transmitted over the serial connection (USB or UART). This allows integration with custom controllers, scripts, or other non-ROS systems.
 
-The robot receives movement commands via **serial communication**. Commands must follow a specific format, consisting of a start symbol, message type, content, and an end symbol:
+This firmware is responsible for:
+
+* Receiving velocity and mode commands from the ROS driver via serial.
+* Translating Cartesian and angular velocities into individual wheel stepper speeds.
+* Driving the stepper motors using the [AccelStepper](https://www.airspayce.com/mikem/arduino/AccelStepper/) library.
+* Monitoring battery voltage and periodically reporting it to ROS.
+* Displaying motion feedback on the Arduino LED Matrix.
+* Enforcing safety via a watchdog timer.
+
+---
+
+## System Architecture
+
+
+```mermaid
+flowchart LR
+    A[ROS / omni_robot_driver<br/>(or other serial source)]* -- USB Serial --> B[Arduino + Omni Rover Hardware Driver]
+    B -- Step/Dir --> C[Stepper Drivers]
+    C --> D[Motors]
+```
+
+\*(Or any serial message source following the protocol)
+
+### Pin Configuration
+
+| Function              | Pin     |
+| --------------------- | ------- |
+| Motors Enable         | 8       |
+| Motor L2 Step / Dir   | 2 / 5   |
+| Motor L1 Step / Dir   | 3 / 6   |
+| Motor R2 Step / Dir   | 4 / 7   |
+| Motor R1 Step / Dir   | 12 / 13 |
+| Battery Voltage Sense | A0      |
+| LED (built-in)        | 13      |
+
+---
+
+## Communication Protocol
+
+The firmware communicates with the host (ROS driver or manual terminal) via **serial messages** framed with start/end symbols:
 
 ```
-<START_SYMBOL><Message_Type><Content><END_SYMBOL>
+<START_SYMBOL><Command_Type><Content><END_SYMBOL>
 ```
 
 Where:
-- **START_SYMBOL**: The symbol marking the start of the message (`$`).
-- **END_SYMBOL**: The symbol marking the end of the message (`\n`).
-- **Message_Type**: A single character indicating the type of command (e.g., `S` for speed control).
-- **Content**: The data for the command (e.g., velocities for movement).
 
-### Speed Command (`S`)
+* **START_SYMBOL** = `$`
+* **END_SYMBOL** = `\n`
+* **Command_ype** = One character
+* **Content** = ASCII or binary data depending on the command
 
-- **Message_Type**: `S`
-- **Content**: A comma-separated list of three integers representing the speeds for the X, Y, and Z (rotation) axes. Each speed value is scaled by a factor of 10.
+### Command Types
 
-Example format:
+| Code | Name             | Direction | Description                      |
+| ---- | ---------------- | --------- | -------------------------------- |
+| `M`  | Message          | → PC      | Generic ASCII message            |
+| `S`  | Super Command    | ← PC      | Switch operating mode            |
+| `V`  | Velocity Command | ← PC      | Set robot velocities (vx, vy, ω) |
+| `B`  | Battery Voltage  | → PC      | Report battery voltage (mV)      |
+| `E`  | Error            | → PC      | Error message                    |
 
-```
-S<int1>,<int2>,<int3>
-```
+---
 
-Where:
-- `<int1>`: Speed for the X-axis (linear movement).
-- `<int2>`: Speed for the Y-axis (linear movement).
-- `<int3>`: Speed for rotation (angular velocity).
+### Example Commands
 
-For example, to send a command to move with speeds 2 m/s in the X direction, 1 m/s in the Y direction, and 0.5 rad/s for rotation, send the following command:
-
-```
-$S20,10,5\n
-```
-
-### Error Handling
-
-If the message format is invalid or the command is unrecognized, the system will send an error message back in the following format:
+**Velocity Command** – Move at 2.0 m/s (X), 1.0 m/s (Y), 0.5 rad/s (rotation):
 
 ```
-$E<Error_Message>\n
+$V20,10,5\n
 ```
 
-Where:
-- **Error_Message**: A brief description of the error.
-
-For example, if the speed command is not formatted correctly, the system might respond with:
+**Super Command** – Switch to velocity control mode:
 
 ```
-$EInvalid speed command format\n
+$S1\n
 ```
 
-## Setup and Usage
+**Battery Report** – Sent automatically every 5 seconds:
 
-1. Connect the robot to the Arduino board, ensuring that the stepper motors and motor drivers are correctly wired.
-2. Upload the provided code to your Arduino board.
-3. Use a serial terminal (e.g., Arduino Serial Monitor or any other serial communication tool) to send commands to the robot.
+```
+$B7400\n
+```
+
+→ 7.4 V battery
+
+**Error Message**:
+
+```
+$EInvalid command\n
+```
+
+---
+
+## Safety Features
+
+* **Watchdog timeout**: Motors stop if no `S` or `V` command is received within 500 ms.
+* **Mode enforcement**: Velocity commands are only applied when in `MODE_VELOCITY`.
+* **Voltage monitoring**: Battery readings sent every 5 s.
+
+---
+
+## Setup & Usage
+
+1. **Hardware wiring**: Connect motors and drivers according to the **Pin Configuration** table.
+2. **Check Settings**: Ensure hardware_config.hpp resembles hardware setup (eg. microsteps, max_speed ...)
+2. **Upload firmware**: Compile and upload this code to your Arduino.
+3. **Connect to ROS**:
+
+   * Install and run the [omni\_robot\_driver](https://github.com/bottad/omni_robot_driver) package.
+   * Set the correct serial port in the ROS driver configuration.
+4. **Run control**: Send velocity/mode commands from ROS or a serial terminal.
