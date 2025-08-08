@@ -23,7 +23,7 @@ This firmware is responsible for:
 
 ```mermaid
 flowchart LR
-    A[ROS / omni_robot_driver (or other serial source)] -- USB Serial --> B[Arduino + Omni Rover Hardware Driver]
+    A[ROS / omni_robot_driver \(or other serial source\)] -- USB Serial --> B[Arduino + Omni Rover Hardware Driver]
     B -- Step/Dir --> C[Stepper Drivers]
     C --> D[Motors]
 ```
