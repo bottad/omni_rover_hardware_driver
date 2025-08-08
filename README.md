@@ -28,6 +28,26 @@ flowchart LR
     style B fill:#d9e7f9,stroke:#2a4d69,stroke-width:1.5px
 ```
 
+---
+
+## Setup & Usage
+
+1. **Hardware wiring**: Connect motors and drivers according to the **Pin Configuration** table.
+2. **Check Settings**: Ensure `hardware_config.hpp` matches your hardware setup (e.g., microsteps, max\_speed, etc.).
+3. **Development Environment**:
+
+   This project is intended to be built and uploaded using **PlatformIO**. If you open this repository in **VS Code** with the **PlatformIO extension installed**, it should automatically prompt you to install any required libraries and toolchains.
+
+   If PlatformIO is not installed, VS Code may suggest installing it when you open the project.
+4. **Upload firmware**: Compile and upload the firmware to your Arduino using PlatformIO.
+5. **Connect and control**:
+
+   * Use the [omni\_robot\_driver](https://github.com/bottad/omni_robot_driver) ROS package to send velocity and mode commands via serial.
+   * Alternatively, send commands from any other source (scripts, terminals, custom controllers) as long as they follow the defined message protocol and communicate over serial.
+6. **Run control**: Send velocity/mode commands from ROS or a serial terminal.
+
+---
+
 ### Pin Configuration
 
 | Function              | Pin     |
@@ -69,51 +89,8 @@ Where:
 
 ---
 
-### Example Commands
-
-**Velocity Command** – Move at 2.0 m/s (X), 1.0 m/s (Y), 0.5 rad/s (rotation):
-
-```
-$V20,10,5\n
-```
-
-**Super Command** – Switch to velocity control mode:
-
-```
-$S1\n
-```
-
-**Battery Report** – Sent automatically every 5 seconds:
-
-```
-$B7400\n
-```
-
-→ 7.4 V battery
-
-**Error Message**:
-
-```
-$EInvalid command\n
-```
-
----
-
 ## Safety Features
 
 * **Watchdog timeout**: Motors stop if no `S` or `V` command is received within 500 ms.
 * **Mode enforcement**: Velocity commands are only applied when in `MODE_VELOCITY`.
 * **Voltage monitoring**: Battery readings sent every 5 s.
-
----
-
-## Setup & Usage
-
-1. **Hardware wiring**: Connect motors and drivers according to the **Pin Configuration** table.
-2. **Check Settings**: Ensure hardware_config.hpp resembles hardware setup (eg. microsteps, max_speed ...)
-2. **Upload firmware**: Compile and upload this code to your Arduino.
-3. **Connect to ROS**:
-
-   * Install and run the [omni\_robot\_driver](https://github.com/bottad/omni_robot_driver) package.
-   * Set the correct serial port in the ROS driver configuration.
-4. **Run control**: Send velocity/mode commands from ROS or a serial terminal.
