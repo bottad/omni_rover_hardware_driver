@@ -1,6 +1,6 @@
 # Omni Rover Hardware Driver
 
-## Overview
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 The **Omni Rover Hardware Driver** is the **low-level firmware** for an omni-directional rover with mecanum wheels, powered by stepper motors and controlled by an Arduino.
 It is designed to work **in conjunction with the [omni\_robot\_driver](https://github.com/bottad/omni_robot_driver)** ROS package, which handles high-level control, navigation, and joystick input.
@@ -94,3 +94,14 @@ Where:
 * **Watchdog timeout**: Motors stop if no `S` or `V` command is received within 500 ms.
 * **Mode enforcement**: Velocity commands are only applied when in `MODE_VELOCITY`.
 * **Voltage monitoring**: Battery readings sent every 5 s.
+
+---
+
+## License
+
+This project is licensed under the [GNU General Public License v3.0 (GPLv3)](https://www.gnu.org/licenses/gpl-3.0.html).
+
+This project uses the AccelStepper library, which is also licensed under GPL v3.  
+Accordingly, this repository is distributed under the GPL v3 license.
+
+For the full license text, see the [LICENSE](./LICENSE) file.
