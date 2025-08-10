@@ -10,9 +10,6 @@ constexpr float WHEEL_RADIUS = 0.03;
 constexpr float L_X = 0.075;
 constexpr float L_Y = 0.05;
 
-float vMaxMultiplier = 0.4; // Max speed in m/s
-float wMaxMultiplier = 0.5; // Max angular speed in rad/s
-
 extern AccelStepper motorL2;
 extern AccelStepper motorL1;
 extern AccelStepper motorR2;
@@ -60,8 +57,8 @@ float radiansToSteps(float radians){
 std::vector<float> wheelVelocitiesFromCartesian(float v_x, float v_y, float omega){
     std::vector<float> wheel_velocities(4);
 
-    v_x *= vMaxMultiplier;
-    v_y *= vMaxMultiplier;
+    v_x *= xMaxMultiplier;
+    v_y *= yMaxMultiplier;
     omega *= wMaxMultiplier;
 
     float omega_fl = 1/WHEEL_RADIUS * (v_x - v_y - (L_X + L_Y) * omega);
