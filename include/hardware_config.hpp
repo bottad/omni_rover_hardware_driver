@@ -31,10 +31,10 @@ constexpr int MICROSTEPS = 8;       //  8 microsteps per step
 constexpr int MAX_SPEED = 3000;     // Max speed in steps per second, max reliable 4000
 
 // Speed limitation multipliers
-constexpr float xMaxMultiplier = 0.5; // Max x-axis speed in m/s
-constexpr float yMaxMultiplier = 0.2; // Max y-axis speed in m/s
-constexpr float wMaxMultiplier = 0.6; // Max angular speed in rad/s
+constexpr float xMaxMultiplier = 0.3; // Max x-axis speed in m/s
+constexpr float yMaxMultiplier = 0.3; // Max y-axis speed in m/s
+constexpr float wMaxMultiplier = 1.0; // Max angular speed in rad/s
 
-constexpr float REFERENCE_VOLTAGE = 1.5; // Determined by measuring the battery voltage with a multimeter and comparing it to the ADC reading
+constexpr float REFERENCE_VOLTAGE = 1.473; // Determined by measuring the battery voltage with a multimeter and comparing it to the ADC reading
 
 #endif // HARDWARE_CONFIG_HPP

@@ -40,36 +40,36 @@ float radiansToSteps(float radians){
   return radians * STEPS_PER_REV * MICROSTEPS / (2 * M_PI);
 }
 
-/**
- * @brief Converts Cartesian velocity commands (v_x, v_y, omega) to wheel velocities in steps per second.
- * 
- * This function calculates the individual wheel velocities required to achieve the specified 
- * Cartesian velocity commands for a four-wheeled omnidirectional robot. The inputs are unitless 
- * commands in the range [-1, 1], and the `vMaxMultiplier` is used to scale these commands to 
- * their actual dimensions. The velocities are returned as a vector, where each element corresponds 
- * to the velocity of a specific wheel.
- * 
- * @param v_x Unitless linear velocity command in the x direction, expected to be in the range [-1, 1].
- * @param v_y Unitless linear velocity command in the y direction, expected to be in the range [-1, 1].
- * @param omega Unitless angular velocity command around the z-axis, expected to be in the range [-1, 1].
- * @return A vector containing the wheel velocities (steps per second) for each of the four wheels.
- */
 std::vector<float> wheelVelocitiesFromCartesian(float v_x, float v_y, float omega){
-    std::vector<float> wheel_velocities(4);
+  std::vector<float> wheel_velocities(4);
 
-    v_x *= xMaxMultiplier;
-    v_y *= yMaxMultiplier;
-    omega *= wMaxMultiplier;
+  v_x *= xMaxMultiplier;
+  v_y *= yMaxMultiplier;
+  omega *= wMaxMultiplier;
 
-    float omega_fl = 1/WHEEL_RADIUS * (v_x - v_y - (L_X + L_Y) * omega);
-    float omega_fr = 1/WHEEL_RADIUS * (v_x + v_y + (L_X + L_Y) * omega);
-    float omega_rl = 1/WHEEL_RADIUS * (v_x + v_y - (L_X + L_Y) * omega);
-    float omega_rr = 1/WHEEL_RADIUS * (v_x - v_y + (L_X + L_Y) * omega);
+  float L = L_X + L_Y;
 
-    wheel_velocities[0] = radiansToSteps(omega_fl);
-    wheel_velocities[1] = radiansToSteps(omega_fr);
-    wheel_velocities[2] = radiansToSteps(omega_rl);
-    wheel_velocities[3] = radiansToSteps(omega_rr);
+  float omega_fl = 1/WHEEL_RADIUS * (v_x - v_y - L * omega);
+  float omega_fr = 1/WHEEL_RADIUS * (v_x + v_y + L * omega);
+  float omega_rl = 1/WHEEL_RADIUS * (v_x + v_y - L * omega);
+  float omega_rr = 1/WHEEL_RADIUS * (v_x - v_y + L * omega);
 
-    return wheel_velocities;
+  wheel_velocities[0] = radiansToSteps(omega_fl);
+  wheel_velocities[1] = radiansToSteps(omega_fr);
+  wheel_velocities[2] = radiansToSteps(omega_rl);
+  wheel_velocities[3] = radiansToSteps(omega_rr);
+
+  float max_wheel_speed = 0.0f;
+  for (auto w : wheel_velocities) {
+    if (std::fabs(w) > max_wheel_speed) max_wheel_speed = std::fabs(w);
+  }
+
+  if (max_wheel_speed > MAX_SPEED) {
+    float scale = MAX_SPEED / max_wheel_speed;
+    for (auto& w : wheel_velocities) {
+      w *= scale;
+    }
+  }
+
+  return wheel_velocities;
 }

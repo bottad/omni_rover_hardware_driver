@@ -40,17 +40,24 @@ void runMotors();
 float radiansToSteps(float radians);
 
 /**
- * @brief Calculates wheel velocities from Cartesian coordinates.
+ * @brief Converts Cartesian velocity commands (v_x, v_y, omega) to wheel velocities in steps per second.
  * 
- * This function takes the desired velocities in the x and y directions, as well as the angular
- * velocity, and calculates the corresponding wheel velocities for a four-wheeled omnidirectional
- * rover. The velocities are returned as a vector of four floats, representing the velocities
- * for the front-left, front-right, rear-left, and rear-right wheels, respectively.
+ * This function converts unitless Cartesian velocity commands for a four-wheeled omnidirectional robot
+ * into individual wheel velocities expressed in steps per second. The inputs v_x, v_y, and omega 
+ * represent normalized commands in the range [-1, 1], which are scaled by configured maximum velocity 
+ * multipliers (xMaxMultiplier, yMaxMultiplier, wMaxMultiplier) to convert to physical units.
  * 
- * @param v_x The velocity in the x direction.
- * @param v_y The velocity in the y direction.
- * @param omega The angular velocity.
- * @return A vector of four floats representing the wheel velocities.
+ * After calculating the wheel velocities based on the robot geometry and wheel radius, the function 
+ * checks if any computed wheel velocity exceeds the defined maximum stepper motor speed (MAX_SPEED). 
+ * If so, all wheel velocities are proportionally scaled down to ensure the maximum speed constraint 
+ * is not violated. This preserves the relative velocity ratios, maintaining the intended motion 
+ * direction but limiting the overall speed.
+ * 
+ * @param v_x Unitless linear velocity command in the x direction, expected in [-1, 1].
+ * @param v_y Unitless linear velocity command in the y direction, expected in [-1, 1].
+ * @param omega Unitless angular velocity command about the z-axis, expected in [-1, 1].
+ * @return A vector of four floats representing wheel velocities in steps per second, scaled if necessary
+ *         to not exceed the motor controller's maximum speed.
  */
 std::vector<float> wheelVelocitiesFromCartesian(float v_x, float v_y, float omega);
 
