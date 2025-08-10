@@ -28,9 +28,11 @@ void RobotController::update() {
                 break;
             case CMD_SUPER:
                 onSuperCommand(msg.content.c_str(), msg.content.length());
+                lastCommandTime_ = now; // Update time if we command received
                 break;
             case CMD_VELOCITY:
                 onVelocityCommand(msg.content.c_str(), msg.content.length());
+                lastCommandTime_ = now; // Update time if we command received
                 break;
             case ERR:
                 // Handle error message
@@ -40,11 +42,10 @@ void RobotController::update() {
                 serialHandler_.sendError("Unknown message type");
                 break;
         }
-
-        lastCommandTime_ = now; // Update time if we command received
     }
 
-    if (millis() - lastCommandTime_ > watchDogTimer_) {
+    // Reset Motor Velocities if connection lost or no command received for a while
+    if (now - lastCommandTime_ > watchDogTimer_) {
         resetMotorVelocities();
         frame_[8][12] = {0};
     }
